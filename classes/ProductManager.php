@@ -102,43 +102,44 @@ class ProductManager {
     }
     
 
-    public function getProductsHTML() {
-        $productsHTML = '';
-    
-        $result = $this->conn->query("SELECT * FROM products");
-    
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $productType = $row['type'];
-    
-                $className = ucfirst($productType);
-    
-                if (class_exists($className)) {
-                    $reflectionClass = new ReflectionClass($className);
-                    $constructorParams = $reflectionClass->getConstructor()->getParameters();
-                    $args = [];
-                    foreach ($constructorParams as $param) {
-                        $paramName = $param->getName();
-                        if (array_key_exists($paramName, $row)) {
-                            $args[] = $row[$paramName];
-                        }
+public function getProductsHTML() {
+    $productsHTML = '';
+
+    $result = $this->conn->query("SELECT * FROM products");
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $productType = $row['type'];
+
+            $className = ucfirst($productType);
+
+            if (class_exists($className)) {
+                $reflectionClass = new ReflectionClass($className);
+                $constructorParams = $reflectionClass->getConstructor()->getParameters();
+                $args = [];
+                foreach ($constructorParams as $param) {
+                    $paramName = $param->getName();
+                    if (array_key_exists($paramName, $row)) {
+                        $args[] = $row[$paramName];
                     }
-    
-                    $product = $reflectionClass->newInstanceArgs($args);
-    
-                    $productsHTML .= '<div class="product-container">';
-                    $productsHTML .= '<div class="product-info">';
-                    $productsHTML .= $product->displayProduct();
-                    $productsHTML .= '</div>';
-                    $productsHTML .= '<div class="product-actions">';
-                    $productsHTML .= '<input type="checkbox" class="delete-checkbox" value="' . $product->getSKU() . '">';
-                    $productsHTML .= '</div>';
-                    $productsHTML .= '</div>';
                 }
+
+                $product = $reflectionClass->newInstanceArgs($args);
+
+                $productsHTML .= '<div class="product-container">';
+                $productsHTML .= '<div class="product-info">';
+                $productsHTML .= $product->displayProduct();
+                $productsHTML .= '</div>';
+                $productsHTML .= '<div class="product-actions">';
+                $productsHTML .= '<input type="checkbox" class="delete-checkbox" value="' . $product->getSKU() . '">';
+                $productsHTML .= '</div>';
+                $productsHTML .= '</div>';
             }
         }
-    
-        return $productsHTML;
     }
+
+    return $productsHTML;
+}
+
 }
 ?>
